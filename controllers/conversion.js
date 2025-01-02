@@ -30,7 +30,7 @@ router.post("/json_to_yaml_domain", (req, res) => {
     const lines = convertedYaml.split("\n");
 
     const processedLines = lines.map((line) => {
-      const match = line.match(/^(\s*-?\s*text:\s+)(.+)$/);
+      const match = line.match(/^(\s*-?\s*text:\s+)([^\n]+)$/);
       if (match) {
         const prefix = match[1];
         let value = match[2].trim();
