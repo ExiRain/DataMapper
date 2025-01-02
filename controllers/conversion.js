@@ -28,15 +28,15 @@ router.post("/json_to_yaml_domain", (req, res) => {
   try {
     let convertedYaml = stringify(req.body, { lineWidth: 0 });
 
-    convertedYaml = convertedYaml.replace(
-        /^-?\s*text:\s+([^"\n]+)$/gm,
-      (_, prefix, value) => {
-        if (!value.startsWith("\"") && !value.endsWith("\"")) {
-          const escapedValue = value.trim().replace(/"/g, "\\\"");
-          return `${prefix}"${escapedValue}"`;
-        }
-        return `${prefix}${value}`;
-      });
+    const regex = /^(\s*-?\s*text:\s+)(.*)$/gm;
+    convertedYaml = convertedYaml.replace(regex, (_, prefix, value) => {
+      value = value.trim();
+      if (!value.startsWith('"') || !value.endsWith('"')) {
+        const escapedValue = value.replace(/"/g, '\\"');
+        return `${prefix}"${escapedValue}"`;
+      }
+      return `${prefix}${value}`;
+    });
 
     res.send({ json: convertedYaml });
   } catch (error) {
