@@ -27,17 +27,24 @@ router.post("/json_to_yaml", (req, res) => {
 router.post("/json_to_yaml_domain", (req, res) => {
   try {
     let convertedYaml = stringify(req.body, { lineWidth: 0 });
+    const lines = convertedYaml.split("\n");
 
-    const regex = /^(\s*-?\s*text:\s+)(.*)$/gm;
-    convertedYaml = convertedYaml.replace(regex, (_, prefix, value) => {
-      value = value.trim();
-      if (!value.startsWith('"') || !value.endsWith('"')) {
-        const escapedValue = value.replace(/"/g, '\\"');
-        return `${prefix}"${escapedValue}"`;
+    const processedLines = lines.map((line) => {
+      const match = line.match(/^(\s*-?\s*text:\s+)(.+)$/);
+      if (match) {
+        const prefix = match[1];
+        let value = match[2].trim();
+
+        if (!value.startsWith('"') || !value.endsWith('"')) {
+          value = `"${value.replace(/"/g, '\\"')}"`;
+        }
+        return `${prefix}${value}`;
       }
-      return `${prefix}${value}`;
+
+      return line;
     });
 
+    convertedYaml = processedLines.join("\n");
     res.send({ json: convertedYaml });
   } catch (error) {
     res.status(500).json({ error: "Failed to create file", details: error.message });
