@@ -30,17 +30,18 @@ router.post("/json_to_yaml_domain", (req, res) => {
     const lines = convertedYaml.split("\n");
 
     const processedLines = lines.map((line) => {
-      const match = line.match(/^(\s*-?\s*text:\s+)([^\n]+)$/);
-      if (match) {
-        const prefix = match[1];
-        let value = match[2].trim();
+      const trimmedLine = line.trim();
+      if (trimmedLine.startsWith("text:") || trimmedLine.startsWith("- text:")) {
+        const splitObject = line.split(":");
+        const prefix = splitObject[0];
+        const value = splitObject[1].trim();
 
         if (!value.startsWith('"') || !value.endsWith('"')) {
-          value = `"${value.replace(/"/g, '\\"')}"`;
+          const escapedValue = value.replace(/"/g, '\\"');
+          return `${prefix}: "${escapedValue}"`;
         }
-        return `${prefix}${value}`;
+        return line;
       }
-
       return line;
     });
 
